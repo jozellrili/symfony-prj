@@ -1,0 +1,64 @@
+version: '3.7'
+
+services:
+  db:
+    image: mysql:5.7
+    container_name: db
+    hostname: mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD_FILE=/run/secrets/db_root_password
+      - MYSQL_DATABASE=appdb
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD_FILE=/run/secrets/db_password
+    restart: unless-stopped
+    ports:
+      - 127.0.0.1:3306:3306
+    volumes:
+      - mysql-data:/var/lib/mysql
+    secrets:
+      - db_root_password
+      - db_password
+    networks:
+      - default
+
+  app:
+    build:
+      args:
+        user: jrili
+        uid: 1000
+      context: .
+      dockerfile: src/dockerfiles/app/Dockerfile
+    container_name: app
+    hostname: app
+    restart: unless-stopped
+    working_dir: /var/www/
+    volumes:
+      - ./src:/var/www
+      - ./src/dockerfiles/php/conf.d/xdebug.ini:/usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+      - ./src/dockerfiles/php/conf.d/error_reporting.ini:/usr/local/etc/php/conf.d/error_reporting.ini
+    networks:
+      - default
+
+  nginx:
+    image: nginx:1.17-alpine
+    container_name: nginx
+    restart: unless-stopped
+    ports:
+      - 8000:80
+    volumes:
+      - ./src:/var/www
+      - ./src/dockerfiles/nginx:/etc/nginx/conf.d
+    networks:
+      - default
+
+secrets:
+  db_root_password:
+    file: db_root_password.txt
+  db_password:
+    file: db_password.txt
+
+volumes:
+  mysql-data:
+
+networks:
+  default:
