@@ -3,7 +3,7 @@ version: '3.7'
 services:
   db:
     image: mysql:5.7
-    container_name: db
+    container_name: sf_db
     hostname: mysql
     environment:
       - MYSQL_ROOT_PASSWORD_FILE=/run/secrets/db_root_password
@@ -28,7 +28,7 @@ services:
         uid: 1000
       context: .
       dockerfile: src/dockerfiles/app/Dockerfile
-    container_name: app
+    container_name: sf_app
     hostname: app
     restart: unless-stopped
     working_dir: /var/www/
@@ -41,7 +41,7 @@ services:
 
   nginx:
     image: nginx:1.17-alpine
-    container_name: nginx
+    container_name: sf_nginx
     restart: unless-stopped
     ports:
       - 8000:80
