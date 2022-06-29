@@ -3,7 +3,7 @@ version: '3.7'
 services:
   db:
     image: mysql:5.7
-    container_name: db
+    container_name: sf_db
     hostname: mysql
     environment:
       - MYSQL_ROOT_PASSWORD_FILE=/run/secrets/db_root_password
@@ -27,27 +27,27 @@ services:
         user: jrili
         uid: 1000
       context: .
-      dockerfile: src/dockerfiles/app/Dockerfile
-    container_name: app
+      dockerfile: dockerfiles/app/Dockerfile
+    container_name: sf_app
     hostname: app
     restart: unless-stopped
     working_dir: /var/www/
     volumes:
-      - ./src:/var/www
-      - ./src/dockerfiles/php/conf.d/xdebug.ini:/usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
-      - ./src/dockerfiles/php/conf.d/error_reporting.ini:/usr/local/etc/php/conf.d/error_reporting.ini
+      - ./app:/var/www
+      - ./dockerfiles/php/conf.d/xdebug.ini:/usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+      - ./dockerfiles/php/conf.d/error_reporting.ini:/usr/local/etc/php/conf.d/error_reporting.ini
     networks:
       - default
 
   nginx:
     image: nginx:1.17-alpine
-    container_name: nginx
+    container_name: sf_nginx
     restart: unless-stopped
     ports:
       - 8000:80
     volumes:
-      - ./src:/var/www
-      - ./src/dockerfiles/nginx:/etc/nginx/conf.d
+      - ./app:/var/www
+      - ./dockerfiles/nginx:/etc/nginx/conf.d
     networks:
       - default
 
